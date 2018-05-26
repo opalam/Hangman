@@ -1,0 +1,48 @@
+const http = require('http');
+var winrate;
+
+for(var i=0; i<2; i++) {
+    var original;
+    var post;
+    var status;
+    var chars = ['e', 'a', 'r', 'i', 'o', 't', 'n', 's', 'l', 'c', 'u', 'd', 'p', 'm', 'h', 'g', 'b', 'f', 'y', 'w', 'k', 'v', 'x', 'z', 'j', 'q'];
+    var pos = 0;
+    http.get("http://httpbin.org/get", (res) => {
+        res.setEncoding('utf8');
+        res.on("data", function(chunk) {
+            console.log("GET CHUNK: " + chunk);
+            original = JSON.parse(chunk);
+            status = original.status;
+
+            var options = {
+                host: "httpbin.org",
+                path: "/post",
+                method: "POST",
+                headers: {"Content-Type" : "application/json"}
+            };
+
+            pos = 0;
+            while(pos < 26) {
+                console.log("TEST");
+                var req = http.request(options, (res) => {
+                    console.log("POST CALLBACK");
+                    res.setEncoding('utf8');
+                    res.on("data", function(chunk) {
+                        post = JSON.parse(chunk);
+                        status = post.status;
+                        winrate = post.win_rate;
+                        console.log("POST DATA");
+                        //console.log("winrate " + post.win_rate);
+                        //console.log(status);
+
+                        console.log(chunk);
+                    });
+                });
+                var char = chars[pos];
+                pos = pos + 1;
+                req.write(JSON.stringify({"guess" : chars[pos]}), encoding='utf8');
+                req.end();
+            }
+        });
+    });
+}

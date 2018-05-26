@@ -1,0 +1,51 @@
+const http = require('http');
+const readline = require('readline-sync');
+var winrate;
+
+for(var i=0; i<2; i++) {
+    var original;
+    var post;
+    var status;
+    var chars = ['e', 's', 'i', 'a', 'r', 'n', 't', 'o', 'l', 'c', 'd', 'u', 'p', 'm', 'g', 'h', 'b', 'y', 'f', 'v', 'k', 'w', 'z', 'x', 'q', 'j'];
+    var pos = 0;
+    http.get("http://upe.42069.fun/s9lfX", (res) => {
+        res.setEncoding('utf8');
+        res.on("data", function(chunk) {
+            console.log("GET CHUNK: " + chunk);
+            original = JSON.parse(chunk);
+            //status = original.status;
+            //blanks = original.state.split(' ');
+            var options = {
+                host: "upe.42069.fun",
+                path: "/s9lfX",
+                method: "POST",
+                headers: {"Content-Type" : "application/json"}
+            };
+
+
+            var letter;
+            pos = 0;
+
+            while(pos < 26) {
+                var req = http.request(options, (res) => {
+                    console.log("POST CALLBACK");
+                    res.setEncoding('utf8');
+                    res.on("data", function(chunk) {
+                        post = JSON.parse(chunk);
+                        status = post.status;
+                        winrate = post.win_rate;
+                        console.log("POST DATA");
+                        console.log(chunk);
+
+                        letter = readline.question('Next Letter: ');
+                    });
+                });;
+
+                var char = letter;
+                pos = pos + 1;
+                req.write(JSON.stringify({"guess" : char}, encoding='utf8'));
+                req.end();
+            }
+        });
+    });
+}
